@@ -1,0 +1,43 @@
+import React from 'react'
+import axios from 'axios'
+import { useState } from 'react'
+
+const Login = () => {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const parseJwt = (token) => {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+  }
+
+  const loginBtn = () => {
+    axios.post('http://localhost:5002/login', {
+      email: email, password: password
+    })
+      .then((res) => {
+        console.log(parseJwt(res.data.token))
+        localStorage.setItem("token", res.data.token)
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  return (
+    <div>
+      <input placeholder='Email' value={email} onChange={e => setEmail(e.target.value)} type="text" />
+      <input placeholder='Password' value={password} onChange={e => setPassword(e.target.value)} type="password" />
+      <button onClick={loginBtn}>Login</button>
+    </div>
+  )
+}
+
+export default Login
